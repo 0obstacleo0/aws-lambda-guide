@@ -1,0 +1,44 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  sam-example-s3
+  Sample SAM Template for sam-example-s3
+Globals:
+  Function:
+    Timeout: 3
+    MemorySize: 128
+    Environment:
+      Variables:
+        OUTPUTBUCKET: examplewrite24030701
+Resources:
+  HelloWorldFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: hello_world/
+      Handler: app.lambda_handler
+      Runtime: python3.9
+      Architectures:
+        - x86_64
+      Role: arn:aws:iam::637423319618:role/example-lambda-role
+      Layers:
+        - !Ref MyLayerPyminizip
+        - arn:aws:lambda:us-east-1:770693421928:layer:Klayers-p39-boto3:23
+  S3Permission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: "lambda:InvoleFunction"
+      FunctionName: !Ref HelloWorldFunction
+      Principal: s3.amazonaws.com
+      SourceAccount: !Ref "AWS::AccountId"
+      SourceArn: !Sub arn:aws:s3:::exampleread24030701
+  MyLayerPyminizip:
+    Type: AWS::Serverless::LayerVersion
+    Properties:
+      ContentUri: "mylayer-pyminizip"
+      CompatibleRuntimes:
+        - python3.9
+    Metadata:
+      BuildMethod: python3.9
+Outputs:
+  MyFunctionArn:
+    Value: !GetAtt HelloWorldFunction.Arn
